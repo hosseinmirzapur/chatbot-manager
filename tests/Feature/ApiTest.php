@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Corporate;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -112,5 +113,49 @@ class ApiTest extends TestCase
 
         // Assert 404 Not Found response
         $response->assertStatus(404);
+    }
+
+    public function test_it_sends_a_message_to_the_chat_and_receives_a_response_from_the_bot()
+    {
+        $baseUrl = strval(config('services.ai.base_url'));
+        $textConverse = strval(config('services.ai.chat.converse.text'));
+
+        Http::fake([
+            $baseUrl . $textConverse => Http::response([
+                'assistant_message' => [
+                    'content' => 'Hello from the bot'
+                ]
+            ])
+        ]);
+
+        // Create a corporate record
+        $corporate = Corporate::query()->create([
+            'name' => Str::random(10),
+            'status' => Corporate::STATUSES[0],
+            'chat_bg' => 'chat_bg.jpg',
+            'logo' => 'logo.jpg',
+        ]);
+
+        // Create a chat record
+        $chat = $corporate->chats()->create();
+
+        // Prepare the request data
+        $data = [
+            'text' => 'Hello, bot!'
+        ];
+
+        $response = $this->postJson('/api/chats/' . $chat->id . '/messages', $data);
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas('messages', [
+            'chat_id' => $chat->id,
+            'text' => $data['text'],
+            'role' => 'user'
+        ]);
+
+        $this->assertDatabaseHas('messages', [
+            'chat_id' => $chat->id,
+            'text' => 'Hello from the bot',
+        ]);
     }
 }

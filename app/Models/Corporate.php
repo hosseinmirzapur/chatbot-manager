@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class Corporate extends Model
@@ -27,5 +28,13 @@ class Corporate extends Model
                 $model->slug = Str::lower(Str::random(10));
             }
         });
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function chats(): HasMany
+    {
+        return $this->hasMany(Chat::class);
     }
 }

@@ -107,4 +107,17 @@ class CorporateController extends Controller
         $corporate->delete();
         return response()->json();
     }
+
+    /**
+     * @param Corporate $corporate
+     * @return JsonResponse
+     */
+    public function chat(Corporate $corporate): JsonResponse
+    {
+        $chat = $corporate->chats()->create();
+
+        return response()->json([
+            'chat' => $chat
+        ]);
+    }
 }
