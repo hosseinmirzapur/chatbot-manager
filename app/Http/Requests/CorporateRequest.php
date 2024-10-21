@@ -36,7 +36,7 @@ class CorporateRequest extends FormRequest
             'name'=>  ['required', Rule::unique('corporates', 'name')],
             'chat_bg' => ['sometimes', 'image'],
             'logo' => ['sometimes', 'image'],
-            'status' => ['required', Rule::in(Corporate::STATUS)]
+            'status' => ['required', Rule::in(Corporate::STATUSES)]
         ];
     }
 
@@ -49,7 +49,7 @@ class CorporateRequest extends FormRequest
             'name'=>  ['nullable', Rule::unique('corporates', 'name')],
             'chat_bg' => ['sometimes', 'image'],
             'logo' => ['sometimes', 'image'],
-            'status' => ['nullable', Rule::in(Corporate::STATUS)]
+            'status' => ['nullable', Rule::in(Corporate::STATUSES)]
         ];
     }
 }
