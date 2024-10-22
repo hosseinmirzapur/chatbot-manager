@@ -120,4 +120,17 @@ class CorporateController extends Controller
             'chat' => $chat
         ]);
     }
+
+    /**
+     * @param Corporate $corporate
+     * @return JsonResponse
+     */
+    public function chatHistory(Corporate $corporate): JsonResponse
+    {
+        $chats = $corporate->chats;
+
+        return response()->json([
+            'chats' => $chats
+        ]);
+    }
 }

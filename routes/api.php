@@ -11,6 +11,7 @@ Route::prefix('/corporates')->group(function() {
     Route::post('/{corporate}/delete', [CorporateController::class, 'destroy']);
     Route::post('/{corporate}/chat', [CorporateController::class, 'chat'])
         ->middleware('auth:corp');
+    Route::get('/{corporate}/chats', [CorporateController::class, 'chatHistory']);
 });
 
 Route::prefix('/chats')->group(function () {
