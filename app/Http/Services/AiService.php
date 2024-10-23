@@ -23,17 +23,34 @@ class AiService
     public function sendToBot(string $message): array
     {
         $textConverse = strval(config('services.ai.chat.converse.text'));
+        $postUrl = $this->baseUrl . $textConverse;
+        $postData = [
+            'request' => json_encode([
+                'chat' => [
+                    'messages' => [
+                        [
+                            'role' => 'assistant',
+                            'content' => 'string'
+                        ]
+                    ]
+                ],
+                'bot' => 'tci'
+            ]),
+            'user_message' => $message
+        ];
         try {
-            $response = Http::withHeaders([
-                'Accept' => 'application/json',
-                'Content-Type' => 'application/json',
-                'Authorization' => 'Bearer ' . $this->apiKey,
-            ])
-                ->post("$this->baseUrl/$textConverse", [
-                    'request' => '{"chat":{"messages":[{"role":"assistant","content":"string"}]},"bot":"tci"}',
-                    'user_message' => $message
-                ]);
+            $response = Http::asForm()
+                ->withHeaders([
+                    'Accept' => 'application/json',
+                    'API-Key' => $this->apiKey,
+                ])
+                ->post($postUrl, $postData);
 
+            if (!$response->successful()) {
+                return [
+                    'error' => $response->body()
+                ];
+            }
             $data = $response->json('assistant_message');
 
             if (isset($data['content'])) {
