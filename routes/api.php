@@ -5,8 +5,7 @@ use App\Http\Controllers\CorporateController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('/corporates')->group(function() {
-    Route::post('/{corporate:slug}/chat', [CorporateController::class, 'chat'])
-        ->middleware('auth:corp');
+    Route::post('/{corporate:slug}/chat', [CorporateController::class, 'chat']);
     Route::get('/{corporate:slug}/chats', [CorporateController::class, 'chatHistory']);
 });
 
