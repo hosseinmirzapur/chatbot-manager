@@ -5,6 +5,7 @@ use App\Http\Controllers\CorporateController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('/corporates')->group(function() {
+    Route::get('/{corporate:slug}', [CorporateController::class, 'show']);
     Route::post('/{corporate:slug}/chat', [CorporateController::class, 'chat']);
     Route::get('/{corporate:slug}/chats', [CorporateController::class, 'chatHistory']);
 });

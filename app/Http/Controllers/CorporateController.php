@@ -8,6 +8,17 @@ use Illuminate\Http\JsonResponse;
 
 class CorporateController extends Controller
 {
+
+    /**
+     * @param Corporate $corporate
+     * @return JsonResponse
+     */
+    public function show(Corporate $corporate): JsonResponse
+    {
+        return response()->json([
+            'corporate' => $corporate
+        ]);
+    }
     /**
      * @param Corporate $corporate
      * @return JsonResponse
