@@ -10,6 +10,10 @@ use Illuminate\Support\Str;
 
 /**
  * @property Collection<Chat> $chats
+ * @property int $id
+ * @property string $slug
+ * @property string $status
+ * @property string $api_key
  */
 class Corporate extends Model
 {
@@ -17,8 +21,6 @@ class Corporate extends Model
     const STATUSES = [
         'PENDING', 'ACCEPTED', 'REJECTED'
     ];
-
-    protected $hidden = ['api_key'];
 
     /**
      * @return void

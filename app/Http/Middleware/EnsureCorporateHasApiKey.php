@@ -21,6 +21,12 @@ class EnsureCorporateHasApiKey
                 'message' => 'Unauthorized access'
             ], 403);
         }
+
+        if ($corporate->status !== 'ACCEPTED') {
+            return response()->json([
+                'message' => 'Unauthorized access'
+            ], 403);
+        }
         return $next($request);
     }
 }
