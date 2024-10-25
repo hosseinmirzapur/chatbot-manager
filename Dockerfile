@@ -12,7 +12,8 @@ RUN apk update && apk add --no-cache \
     git \
     bash \
     icu-dev \
-    zlib-dev
+    zlib-dev \
+    libzip-dev
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo pdo_mysql xml gd intl zip
