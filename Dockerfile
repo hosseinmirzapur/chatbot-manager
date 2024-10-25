@@ -25,13 +25,19 @@ COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 WORKDIR /var/www/chatbots/backend
 
 # Copy existing application directory permissions
-COPY --chown=www-data:www-data . .
+COPY . .
+RUN chown -R www-data:www-data /var/www/chatbots/backend \
+    && chmod -R 775 /var/www/chatbots/backend/storage \
+    && chmod -R 775 /var/www/chatbots/backend/bootstrap/cache
 
 # Install Laravel dependencies
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
+RUN chown -R www-data:www-data /var/www/chatbots/backend/vendor \
+    && chmod -R 775 /var/www/chatbots/backend/vendor
+
 # Expose port 9000 to the outside world
-EXPOSE 8000
+EXPOSE 9000
 
 # Start PHP-FPM server
-CMD ["php", "artisan", "serve"]
+CMD ["php-fpm"]
