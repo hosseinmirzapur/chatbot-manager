@@ -28,7 +28,8 @@ jobs:
 
       - name: Push Docker image to Docker Hub
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/chabots-api
+          docker tag ${{ secrets.DOCKER_USERNAME }}/chabots-api ${{ secrets.DOCKER_USERNAME }}/chabots-api:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/chabots-api:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -45,16 +46,19 @@ jobs:
           chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key $USERNAME@$SERVER_IP << 'EOF'
             # Pull the latest image from Docker Hub
-            docker pull ${{ secrets.DOCKER_USERNAME }}/chabots-api
+            docker pull ${{ secrets.DOCKER_USERNAME }}/chabots-api:latest
 
-            # Stop and remove any existing container (if running)
-            docker stop chabots-api || true && docker rm chabots-api || true
+            # Check if the container exists and stop/remove it if it does
+            if [ "$(docker ps -aq -f name=chabots-api)" ]; then
+              # Stop and remove the existing container
+              docker stop chabots-api || true && docker rm chabots-api || true
+            fi
 
             # Run the new container
-            docker run -d --name chabots-api -p 9000:9000 --env-file /var/www/chatbots/backend/.env ${{ secrets.DOCKER_USERNAME }}/chabots-api
+            docker run -d --name chabots-api -p 9000:9000 --env-file /var/www/chatbots/backend/.env ${{ secrets.DOCKER_USERNAME }}/chabots-api:latest
 
-            # Run migrations
-            docker exec -it chabots-api php artisan migrate --force
+            # Run migrations (this needs to be done on the new container)
+            docker exec chabots-api php artisan migrate --force
           EOF
 
           # Clean up the temporary key file
