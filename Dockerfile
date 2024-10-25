@@ -30,9 +30,6 @@ COPY --chown=www-data:www-data . .
 # Install Laravel dependencies
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
-# Generate application key
-RUN php artisan key:generate
-
 # Expose port 9000 to the outside world
 EXPOSE 9000
 
