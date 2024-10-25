@@ -1,0 +1,5 @@
+vendor/
+.github
+.env*
+.phpunit.result.cache
+README.md
