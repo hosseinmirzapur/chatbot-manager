@@ -10,10 +10,12 @@ RUN apk update && apk add --no-cache \
     zip \
     unzip \
     git \
-    bash
+    bash \
+    icu-dev \
+    zlib-dev
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo pdo_mysql xml gd
+RUN docker-php-ext-install pdo pdo_mysql xml gd intl zip
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
