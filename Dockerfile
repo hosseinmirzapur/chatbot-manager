@@ -31,7 +31,7 @@ COPY --chown=www-data:www-data . .
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
 # Expose port 9000 to the outside world
-EXPOSE 9000
+EXPOSE 8000
 
 # Start PHP-FPM server
-CMD ["php-fpm"]
+CMD ["php", "artisan", "serve"]

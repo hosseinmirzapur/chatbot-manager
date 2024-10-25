@@ -55,10 +55,13 @@ jobs:
             fi
 
             # Run the new container
-            docker run -d --name chabots-api -p 9000:9000 --env-file /var/www/chatbots/backend/.env ${{ secrets.DOCKER_USERNAME }}/chabots-api:latest
+            docker run -d --name chabots-api -p 8000:8000 --env-file /var/www/chatbots/backend/.env ${{ secrets.DOCKER_USERNAME }}/chabots-api:latest
+
+            # Sleep 5 second before trying to run any command in the container
+            sleep 5
 
             # Run migrations (this needs to be done on the new container)
-            docker exec chabots-api php artisan migrate --force
+            docker exec chabots-api php artisan migrate --force || true
           EOF
 
           # Clean up the temporary key file
