@@ -15,8 +15,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libjpeg62-turbo-dev \
     libicu-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql xml gd intl zip openssl bcmath fileinfo \
+    && docker-php-ext-install pdo pdo_mysql xml gd intl openssl bcmath fileinfo \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install the zip extension separately
+RUN docker-php-source extract \
+    && cd /usr/src/php/ext/zip \
+    && /usr/local/bin/phpize \
+    && docker-php-ext-install zip \
+    && docker-php-source delete
 
 # Set working directory
 WORKDIR /var/www
