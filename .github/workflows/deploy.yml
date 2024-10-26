@@ -25,7 +25,7 @@ jobs:
               git pull origin main
             else
               echo "Git repository does not exist. Cloning..."
-              git clone git@github.com:hosseinmirzapur/chatbot-manager.git .
+              git clone https://github.com/hosseinmirzapur/chatbot-manager.git .
             fi
 
             sudo cp /var/www/chatbots/.env /var/www/chatbots/backend/
