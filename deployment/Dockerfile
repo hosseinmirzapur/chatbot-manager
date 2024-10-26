@@ -1,5 +1,5 @@
 # Use PHP with Apache as the base image
-FROM php:8.2-apache as web
+FROM php:8.2-apache AS web
 
 # Install Additional System Dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -10,8 +10,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     unzip \
     git \
     bash \
-    icu-dev \
-    zlib-dev \
     libzip-dev
 
 # Clear cache
