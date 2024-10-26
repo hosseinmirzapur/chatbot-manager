@@ -1,40 +1,37 @@
-# Use the official PHP image with PHP 8.2 FPM based on Ubuntu
-FROM php:8.2-fpm-bullseye
+# Use PHP with Apache as the base image
+FROM php:8.2-apache as web
 
-# Install system dependencies and additional packages for GD and Intl extensions
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libfreetype6-dev \
-    libjpeg62-turbo-dev \
-    libpng-dev \
-    libxml2-dev \
-    curl \
-    zip \
-    unzip \
-    git \
-    bash \
-    libicu-dev \
-    zlib1g-dev \
+# Install Additional System Dependencies
+RUN apt-get update && apt-get install -y \
     libzip-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql xml gd intl zip \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    zip
 
-# Set working directory
-WORKDIR /var/www
+# Clear cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copy existing application directory permissions
-COPY . .
+# Enable Apache mod_rewrite for URL rewriting
+RUN a2enmod rewrite
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql zip
 
-# Install Laravel dependencies
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+# Configure Apache DocumentRoot to point to Laravel's public directory
+# and update Apache configuration files
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# Set permissions for storage and bootstrap/cache
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+# Copy the application code
+COPY . /var/www/html
 
-# Expose port 9000 for PHP-FPM
-EXPOSE 9000
+# Set the working directory
+WORKDIR /var/www/html
 
-CMD ["php-fpm"]
+# Install composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Install project dependencies
+RUN composer install
+
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
