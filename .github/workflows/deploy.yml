@@ -44,7 +44,7 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/chatbots-api:latest
             docker stop chatbots-api || true
             docker rm chatbots-api || true
-            docker run -d --name chatbots-api -p 8000:80 --env-file /var/www/chatbots/backend/.env
+            docker run -d --name chatbots-api -p 8000:80 --env-file /var/www/chatbots/backend/.env ${{ secrets.DOCKER_USERNAME }}/chatbots-api:latest
           EOF
 
           # Clean up the temporary key file
