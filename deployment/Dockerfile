@@ -11,8 +11,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libzip-dev \
     unzip \
     libonig-dev \
-    && docker-php-ext-install pdo pdo_mysql xml gd intl zip mbstring openssl bcmath fileinfo \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions
+RUN docker-php-ext-install pdo pdo_mysql xml gd intl zip mbstring openssl bcmath fileinfo
 
 # Set working directory
 WORKDIR /var/www
