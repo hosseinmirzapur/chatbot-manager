@@ -7,15 +7,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     libpng-dev \
     libxml2-dev \
-    zip \
+    zlib1g-dev \
+    libzip-dev \
     unzip \
-    && docker-php-ext-install pdo pdo_mysql xml gd \
+    && docker-php-ext-install pdo pdo_mysql xml gd intl zip mbstring openssl bcmath fileinfo \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /var/www
 
-# Copy application files
+# Copy existing application directory permissions
 COPY . .
 
 # Install Composer
@@ -30,5 +31,4 @@ RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 # Expose port 9000 for PHP-FPM
 EXPOSE 9000
 
-# Start PHP-FPM
 CMD ["php-fpm"]
