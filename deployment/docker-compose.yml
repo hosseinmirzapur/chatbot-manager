@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+    chatbots-api:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: chatbots-api
+        env_file:
+            - /var/www/chatbots/backend/.env
+        networks:
+            - laravel-network
+        volumes:
+            - .:/var/www
+
+    nginx:
+        image: nginx:latest
+        container_name: nginx
+        depends_on:
+            - chatbots-api
+        volumes:
+            - .:/var/www
+            - ./nginx.conf:/etc/nginx/conf.d/default.conf
+        ports:
+            - "80:80"
+        networks:
+            - laravel-network
+
+networks:
+    laravel-network:
+        driver: bridge
