@@ -1,8 +1,8 @@
 # Use the official PHP image with PHP 8.2 FPM
-FROM php:8.2-fpm
+FROM php:8.2-fpm-alpine
 
 # Install system dependencies and additional packages for gd and intl extensions
-RUN apt update && apt install \
+RUN apk update && apk add --no-cache \
     libpng-dev \
     libxml2-dev \
     curl \
