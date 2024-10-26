@@ -27,9 +27,9 @@ RUN docker-php-ext-install pdo_mysql zip
 # Configure Apache DocumentRoot to point to Laravel's public directory
 # and update Apache configuration files
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN echo "ServerName 0.0.0.0" >> /etc/apache2/apache2.conf
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
-RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 
 # Copy the application code
