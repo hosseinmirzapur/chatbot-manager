@@ -1,29 +1,21 @@
 # Use the official PHP image with PHP 8.2 FPM
-FROM php:8.2-fpm
+FROM php:8.2-fpm-alpine
 
 # Install system dependencies and additional packages for gd and intl extensions
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    git \
-    curl \
+RUN apk update && apk add --no-cache \
     libpng-dev \
     libxml2-dev \
-    zlib1g-dev \
-    libzip-dev \
+    curl \
+    zip \
     unzip \
-    libonig-dev \
-    libfreetype6-dev \
-    libjpeg62-turbo-dev \
-    libicu-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql xml gd intl openssl bcmath fileinfo \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    git \
+    bash \
+    icu-dev \
+    zlib-dev \
+    libzip-dev
 
 # Install the zip extension separately
-RUN docker-php-source extract \
-    && cd /usr/src/php/ext/zip \
-    && /usr/local/bin/phpize \
-    && docker-php-ext-install zip \
-    && docker-php-source delete
+RUN docker-php-ext-install pdo pdo_mysql xml gd intl zip
 
 # Set working directory
 WORKDIR /var/www
