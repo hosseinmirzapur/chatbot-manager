@@ -1,8 +1,10 @@
 # Use the official PHP image with PHP 8.2 FPM based on Ubuntu
 FROM php:8.2-fpm
 
-# Install system dependencies and additional packages for gd and intl extensions
+# Install system dependencies and additional packages for GD and Intl extensions
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
     libpng-dev \
     libxml2-dev \
     curl \
