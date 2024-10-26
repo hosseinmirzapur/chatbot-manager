@@ -45,6 +45,10 @@ jobs:
             docker stop chatbots-api || true
             docker rm chatbots-api || true
             docker run -d --name chatbots-api -p 8000:80 --env-file /var/www/chatbots/backend/.env ${{ secrets.DOCKER_USERNAME }}/chatbots-api:latest
+            sleep 5
+            docker exec chatbots-api php artisan migrate --force
+            sleep 5
+            docker exec chatbots-api echo "ServerName 0.0.0.0" >> /etc/apache2/apache2.conf
           EOF
 
           # Clean up the temporary key file
