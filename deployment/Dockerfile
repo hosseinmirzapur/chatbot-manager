@@ -3,25 +3,22 @@ FROM php:8.2-apache as web
 
 # Install Additional System Dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libfreetype6-dev \
-    libjpeg62-turbo-dev \
     libpng-dev \
     libxml2-dev \
-    libcurl4-openssl-dev \
+    curl \
     zip \
     unzip \
     git \
     bash \
-    libicu-dev \
-    zlib1g-dev \
-    libzip-dev \
-    libonig-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql xml gd intl zip mbstring bcmath tokenizer \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    icu-dev \
+    zlib-dev \
+    libzip-dev
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions
+RUN docker-php-ext-install pdo pdo_mysql xml gd intl zip
 
 # Enable Apache mod_rewrite for URL rewriting
 RUN a2enmod rewrite
