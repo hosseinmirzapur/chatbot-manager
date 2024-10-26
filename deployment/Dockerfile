@@ -2,9 +2,23 @@
 FROM php:8.2-apache as web
 
 # Install Additional System Dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
+    libxml2-dev \
+    curl \
+    zip \
+    unzip \
+    git \
+    bash \
+    libicu-dev \
+    zlib1g-dev \
     libzip-dev \
-    zip
+    libonig-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_mysql xml gd intl zip mbstring bcmath curl tokenizer \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
