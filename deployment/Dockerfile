@@ -1,5 +1,5 @@
 # Use the official PHP image with PHP 8.2 FPM based on Ubuntu
-FROM php:8.2-fpm
+FROM php:8.2-fpm-bullseye
 
 # Install system dependencies and additional packages for GD and Intl extensions
 RUN apt-get update && apt-get install -y --no-install-recommends \
