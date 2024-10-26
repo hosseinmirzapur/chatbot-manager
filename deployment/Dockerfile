@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libjpeg62-turbo-dev \
     libpng-dev \
     libxml2-dev \
-    curl \
+    libcurl4-openssl-dev \
     zip \
     unzip \
     git \
@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libzip-dev \
     libonig-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql xml gd intl zip mbstring bcmath curl tokenizer \
+    && docker-php-ext-install pdo pdo_mysql xml gd intl zip mbstring bcmath tokenizer \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Clear cache
