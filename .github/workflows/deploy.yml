@@ -48,6 +48,15 @@ jobs:
             sleep 5
             echo "Migration database..."
             docker exec chatbots-api php artisan migrate --force
+            sleep 5
+            echo "Clear config..."
+            docker exec chatbots-api php artisan config:clear
+            sleep 5
+            echo "Caching config..."
+            docker exec chatbots-api php artisan config:cache
+            sleep 5
+            echo "Clearing cache..."
+            docker exec chatbots-api php artisan cache:clear
           EOF
 
           # Clean up the temporary key file
