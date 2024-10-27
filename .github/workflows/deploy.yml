@@ -45,18 +45,23 @@ jobs:
             docker stop chatbots-api || true
             docker rm chatbots-api || true
             docker run -d --name chatbots-api -p 8000:80 --env-file /var/www/chatbots/backend/.env ${{ secrets.DOCKER_USERNAME }}/chatbots-api:latest
-            sleep 5
+            sleep 3
             echo "Migration database..."
             docker exec chatbots-api php artisan migrate --force
-            sleep 5
+            sleep 3
             echo "Clear config..."
             docker exec chatbots-api php artisan config:clear
-            sleep 5
+            sleep 3
             echo "Caching config..."
             docker exec chatbots-api php artisan config:cache
-            sleep 5
+            sleep 3
             echo "Clearing cache..."
             docker exec chatbots-api php artisan cache:clear
+            sleep 3
+            echo "Optimizing Filament config..."
+            docker exec chatbots-api php artisan filament:optimize-clear
+            sleep 3
+            docker exec chatbots-api php artisan filament:optimize
           EOF
 
           # Clean up the temporary key file
