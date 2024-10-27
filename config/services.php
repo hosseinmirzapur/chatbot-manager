@@ -17,7 +17,6 @@ return [
     'ai' => [
         'api_key' => env('AI_API_KEY'),
         'base_url' => env('AI_BASE_URL'),
-        'chat_page_url' => 'https://chatbots.irapardaz.ir/corporates',
         'chat' => [
             'echo' => '/chat/echo',
             'converse' => [

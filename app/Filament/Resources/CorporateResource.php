@@ -103,9 +103,7 @@ class CorporateResource extends Resource
                     ->label('Chat')
                     ->url(
                         function (Corporate $corporate) {
-                            return config('services.ai.chat_page_url')
-                                .
-                                "/$corporate->slug";
+                            return "https://chatbots.irapardaz.ir/corporates/$corporate->slug";
                         }, shouldOpenInNewTab: true
                     )
                     ->icon('heroicon-c-chat-bubble-left-ellipsis')
