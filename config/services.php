@@ -30,6 +30,22 @@ return [
         ],
         'client' => [
             'quota' => '/client/quota',
+        ],
+        'static_bot_types' => [
+            "free_discussion",
+            "evolve_1_unit_1",
+            "evolve_1_unit_2",
+            "evolve_1_unit_3",
+            "evolve_1_unit_4",
+            "evolve_3_unit_1",
+            "evolve_3_unit_2",
+            "evolve_3_unit_3",
+            "evolve_3_unit_4",
+            "evolve_5_unit_1",
+            "evolve_5_unit_2",
+            "evolve_5_unit_3",
+            "evolve_5_unit_4",
+            "tci"
         ]
     ]
 

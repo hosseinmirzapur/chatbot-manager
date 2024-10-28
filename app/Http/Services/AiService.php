@@ -2,6 +2,7 @@
 
 namespace App\Http\Services;
 
+use App\Exceptions\CustomException;
 use Exception;
 use Illuminate\Support\Facades\Http;
 
@@ -19,6 +20,7 @@ class AiService
     /**
      * @param string $message
      * @return array
+     * @throws CustomException
      */
     public function sendToBot(string $message): array
     {
@@ -47,9 +49,7 @@ class AiService
                 ->post($postUrl, $postData);
 
             if (!$response->successful()) {
-                return [
-                    'error' => $response->body()
-                ];
+                throw new CustomException($response->body());
             }
             $data = $response->json('assistant_message');
 
@@ -59,14 +59,48 @@ class AiService
                 ];
             }
 
-            return [
-                'error' => 'bot has no response'
-            ];
+            throw new CustomException('bot has no response');
 
         } catch (Exception $e) {
+            throw new CustomException($e->getMessage());
+        }
+    }
+
+    /**
+     * @param string $botType
+     * @return array
+     * @throws CustomException
+     */
+    public function starterMessage(string $botType): array
+    {
+        $supportedBotTypes = array(config('services.ai.static_bot_types'));
+        if (!in_array($botType, $supportedBotTypes)) {
+            throw new CustomException('bot type not supported');
+        }
+
+        $starterMessageEndpoint = strval(config('services.ai.chat.converse.starter-message'));
+        $postUrl = $this->baseUrl . $starterMessageEndpoint;
+        try {
+            $response = Http::withQueryParameters([
+                'bot_type' => $botType,
+            ])
+                ->withHeaders([
+                    'Accept' => 'application/json',
+                    'API-Key' => $this->apiKey,
+                ])
+                ->post($postUrl);
+
+            if (!$response->successful()) {
+                throw new CustomException($response->body());
+            }
+
+            $bot_res = $response->body();
+
             return [
-                'error' => $e->getMessage(),
+                'message' => $bot_res
             ];
+        } catch (Exception $e) {
+            throw new CustomException($e->getMessage());
         }
     }
 

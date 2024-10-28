@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\CustomException;
 use App\Http\Requests\ChatMessageRequest;
 use App\Http\Services\AiService;
 use App\Models\Chat;
@@ -31,6 +32,7 @@ class ChatController extends Controller
      * @param ChatMessageRequest $request
      * @param Chat $chat
      * @return JsonResponse
+     * @throws CustomException
      */
     public function sendMessage(ChatMessageRequest $request, Chat $chat): JsonResponse
     {
@@ -42,11 +44,6 @@ class ChatController extends Controller
         ]);
 
         $result = $this->service->sendToBot($data['text']);
-        if (isset($result['error'])) {
-            return response()->json([
-                'message' => $result['error']
-            ], 400);
-        }
 
         $botMessage = $chat->messages()->create([
             'text' => $result['message'],
