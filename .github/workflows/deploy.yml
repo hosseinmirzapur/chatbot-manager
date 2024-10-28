@@ -26,9 +26,14 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/chatbots-api:latest
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/chatbots-api:latest
+            ${{ secrets.DOCKER_USERNAME }}/chatbots-api:${{ github.sha }}
           file: deployment/Dockerfile
           no-cache: true
+          build-args:
+            CACHEBUST: ${{ github.run_id }}
+
   deploy:
     runs-on: ubuntu-latest
     needs: build
@@ -45,8 +50,8 @@ jobs:
             docker stop chatbots-api || true
             docker rm chatbots-api || true
             docker rmi ${{ secrets.DOCKER_USERNAME }}/chatbots-api --force || true
-            docker pull ${{ secrets.DOCKER_USERNAME }}/chatbots-api:latest
-            docker run -d --name chatbots-api -p 8000:80 --env-file /var/www/chatbots/backend/.env ${{ secrets.DOCKER_USERNAME }}/chatbots-api:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/chatbots-api:${{ github.sha }}
+            docker run -d --name chatbots-api -p 8000:80 --env-file /var/www/chatbots/backend/.env ${{ secrets.DOCKER_USERNAME }}/chatbots-api:${{ github.sha }}
             sleep 3
             echo "Migration database..."
             docker exec chatbots-api php artisan migrate --force
