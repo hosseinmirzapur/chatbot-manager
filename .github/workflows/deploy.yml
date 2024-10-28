@@ -48,8 +48,8 @@ jobs:
             docker stop chatbots-api || true
             docker rm chatbots-api || true
             docker pull ${{ secrets.DOCKER_USERNAME }}/chatbots-api:${{ github.sha }}
-            echo "Running container with --network host argument..."
-            docker run --network host -d --name chatbots-api -p 8000:8000 --env-file /var/www/chatbots/backend/.env ${{ secrets.DOCKER_USERNAME }}/chatbots-api:${{ github.sha }}
+            echo "Running container with --network laravel_network argument..."
+            docker run --network laravel_network --dns 8.8.8.8 --dns 8.8.4.4 -d --name chatbots-api -p 8000:80 --env-file /var/www/chatbots/backend/.env ${{ secrets.DOCKER_USERNAME }}/chatbots-api:${{ github.sha }}
             sleep 3
             echo "Migrating database..."
             docker exec chatbots-api php artisan migrate --force
