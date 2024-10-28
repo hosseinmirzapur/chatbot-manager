@@ -28,8 +28,6 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/chatbots-api:latest
           file: deployment/Dockerfile
-          build-args:
-            CACHEBUST: ${{ github.run_id }}
           no-cache: true
   deploy:
     runs-on: ubuntu-latest
