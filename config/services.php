@@ -19,7 +19,7 @@ return [
         'chat' => [
             'echo' => '/chat/echo',
             'converse' => [
-                'base' => '/chat/converse',
+                'audio' => '/chat/converse',
                 'starter-message' => '/chat/converse/starter-message',
                 'text' => '/chat/converse/text',
             ]

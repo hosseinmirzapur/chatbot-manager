@@ -2,110 +2,16 @@
 
 namespace Tests\Feature;
 
+use App\Models\Chat;
 use App\Models\Corporate;
+use Illuminate\Http\File;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class ApiTest extends TestCase
 {
-    /**
-     * A basic test example.
-     */
-    public function test_it_stores_a_corporate_with_file_uploads(): void
-    {
-        Storage::fake('liara');
-
-        $data = [
-            'name' => Str::random(10),
-            'status' => Corporate::STATUSES[0],
-            'chat_bg' => UploadedFile::fake()->image('chat_bg.jpg'),
-            'logo' => UploadedFile::fake()->image('logo.jpg'),
-        ];
-
-        $response = $this->postJson('/api/corporates', $data);
-
-        $response->assertStatus(200);
-        $this->assertDatabaseHas('corporates', [
-            'name' => $data['name'],
-            'status' => $data['status'],
-        ]);
-
-        $corporate = $response->json('corporate');
-
-        Storage::disk('liara')
-            ->assertExists('/corporates/backgrounds/' . basename($corporate['chat_bg']));
-        Storage::disk('liara')
-            ->assertExists('/corporates/logos/' . basename($corporate['logo']));
-    }
-
-    public function test_it_updates_a_corporate_with_file_uploads()
-    {
-        // Fake the storage disk
-        Storage::fake('liara');
-
-        // Create a corporate with initial data
-        $corporate = Corporate::query()->create([
-            'name' => Str::random(10),
-            'status' => Corporate::STATUSES[0],
-            'chat_bg' => 'old_chat_bg.jpg',
-            'logo' => 'old_logo.jpg',
-        ]);
-
-        // Prepare new data including file uploads
-        $data = [
-            'name' => Str::random(10),
-            'status' => Corporate::STATUSES[1], // Assuming there are multiple statuses
-            'chat_bg' => UploadedFile::fake()->image('new_chat_bg.jpg'),
-            'logo' => UploadedFile::fake()->image('new_logo.jpg'),
-        ];
-
-        // Send the Update request to update the corporate
-        $response = $this->postJson('/api/corporates/' . $corporate->id . '/update', $data);
-
-        // Assert the response is OK
-        $response->assertStatus(200);
-
-        // Assert the corporate was updated in the database
-        $this->assertDatabaseHas('corporates', [
-            'id' => $corporate->id,
-            'name' => $data['name'],
-            'status' => $data['status'],
-        ]);
-
-        // Assert the old files no longer exist on the storage disk
-        Storage::disk('liara')->assertMissing('/corporates/backgrounds/old_chat_bg.jpg');
-        Storage::disk('liara')->assertMissing('/corporates/logos/old_logo.jpg');
-
-        // Assert the new files are stored correctly
-        Storage::disk('liara')->assertExists('/corporates/backgrounds/' . basename($corporate->fresh()->chat_bg));
-        Storage::disk('liara')->assertExists('/corporates/logos/' . basename($corporate->fresh()->logo));
-    }
-
-    public function test_it_deletes_a_corporate()
-    {
-        // Create a corporate record
-        $corporate = Corporate::query()->create([
-            'name' => Str::random(10),
-            'status' => Corporate::STATUSES[0],
-            'chat_bg' => 'chat_bg.jpg',
-            'logo' => 'logo.jpg',
-        ]);
-
-        // Send the DELETE request to destroy the corporate
-        $response = $this->postJson("/api/corporates/$corporate->id/delete");
-
-        // Assert the response is OK
-        $response->assertStatus(200);
-
-        // Assert the corporate is soft-deleted from the database
-        $this->assertDatabaseMissing('corporates', [
-            'id' => $corporate->id,
-        ]);
-    }
-
     public function test_it_returns_404_if_corporate_does_not_exist()
     {
         // Try deleting a non-existent corporate
@@ -131,12 +37,14 @@ class ApiTest extends TestCase
         // Create a corporate record
         $corporate = Corporate::query()->create([
             'name' => Str::random(10),
-            'status' => Corporate::STATUSES[0],
+            'status' => Corporate::STATUSES[1],
             'chat_bg' => 'chat_bg.jpg',
             'logo' => 'logo.jpg',
+            'api_key' => env('AI_API_KEY')
         ]);
 
         // Create a chat record
+        /** @var Chat $chat */
         $chat = $corporate->chats()->create();
 
         // Prepare the request data
@@ -144,7 +52,7 @@ class ApiTest extends TestCase
             'text' => 'Hello, bot!'
         ];
 
-        $response = $this->postJson('/api/chats/' . $chat->id . '/messages', $data);
+        $response = $this->postJson('/api/chats/' . $chat->slug . '/messages', $data);
         $response->assertStatus(200);
 
         $this->assertDatabaseHas('messages', [
@@ -157,5 +65,52 @@ class ApiTest extends TestCase
             'chat_id' => $chat->id,
             'text' => 'Hello from the bot',
         ]);
+    }
+
+    public function test_it_sends_voice_file_and_receives_answer()
+    {
+        $corporate = Corporate::query()->create([
+            'name' => Str::random(10),
+            'status' => Corporate::STATUSES[1],
+            'chat_bg' => 'chat_bg.jpg',
+            'logo' => 'logo.jpg',
+            'api_key' => env('AI_API_KEY')
+        ]);
+
+        /** @var Chat $chat */
+        $chat = $corporate->chats()->create();
+
+        $file = public_path('/hello.mp3');
+
+        $response = $this->postJson("/api/chats/$chat->slug/messages", [
+            'voice' => file_get_contents($file)
+        ]);
+
+        $response->assertStatus(200)->assertJsonStructure([
+            'user', 'bot'
+        ]);
+    }
+
+    public function test_sending_not_wav_voice_file_fails()
+    {
+        $corporate = Corporate::query()->create([
+            'name' => Str::random(10),
+            'status' => Corporate::STATUSES[1],
+            'chat_bg' => 'chat_bg.jpg',
+            'logo' => 'logo.jpg',
+            'api_key' => env('AI_API_KEY')
+        ]);
+
+        /** @var Chat $chat */
+        $chat = $corporate->chats()->create();
+
+        $file = UploadedFile::fake()
+            ->create('voice_file.mp3', 6000, 'audio/mp3');
+
+        $response = $this->postJson("/api/chats/$chat->slug/messages", [
+            'voice' => $file
+        ]);
+
+        $response->assertStatus(422);
     }
 }

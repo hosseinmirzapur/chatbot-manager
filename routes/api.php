@@ -13,6 +13,5 @@ Route::prefix('/corporates')->group(function () {
 
 Route::prefix('/chats')->group(function () {
     Route::get('/{chat:slug}/messages', [ChatController::class, 'messages']);
-    Route::post('/{chat:slug}/messages', [ChatController::class, 'sendMessage'])
-        ->middleware('corp');
+    Route::post('/{chat:slug}/messages', [ChatController::class, 'sendMessage']);
 });

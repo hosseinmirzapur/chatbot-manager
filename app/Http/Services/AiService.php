@@ -5,6 +5,7 @@ namespace App\Http\Services;
 use App\Exceptions\CustomException;
 use Exception;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 class AiService
 {
@@ -24,30 +25,60 @@ class AiService
     }
 
     /**
-     * @param string $message
+     * @param array $userData
      * @return array
      * @throws CustomException
      */
-    public function sendToBot(string $message): array
+    public function sendToBot(array $userData): array
     {
-        $textConverse = strval(config('services.ai.chat.converse.text'));
-        $postUrl = $this->baseUrl . $textConverse;
-        $postData = [
-            'request' => json_encode([
-                'chat' => [
-                    'messages' => [
-                        [
-                            'role' => 'assistant',
-                            'content' => 'string'
+        if (!$this->apiKey) {
+            throw new CustomException('set api key before usage');
+        }
+        if (isset($userData['voice'])) {
+            // Ensure that the file exists and is readable
+            if (!file_exists($userData['voice']) || !is_readable($userData['voice'])) {
+                throw new CustomException('Audio file is not accessible');
+            }
+            $postUrl = $this->baseUrl . config('services.ai.chat.converse.audio');
+            $postData = [
+                'request' => json_encode([
+                    'chat' => [
+                        'messages' => [
+                            [
+                                'role' => 'assistant',
+                                'content' => 'string'
+                            ]
                         ]
-                    ]
-                ],
-                'bot' => 'tci'
-            ]),
-            'user_message' => $message
-        ];
+                    ],
+                    'bot' => 'tci'
+                ]),
+            ];
+        } else {
+            $postUrl = $this->baseUrl . config('services.ai.chat.converse.text');
+            $postData = [
+                'request' => json_encode([
+                    'chat' => [
+                        'messages' => [
+                            [
+                                'role' => 'assistant',
+                                'content' => 'string'
+                            ]
+                        ]
+                    ],
+                    'bot' => 'tci'
+                ]),
+                'user_message' => $userData['text']
+            ];
+        }
+
         try {
-            $response = Http::asForm()
+            $http = isset($userData['voice']) ? Http::asMultipart()
+                ->attach(
+                    'audio_file',
+                    fopen($userData['voice'], 'r'),
+                    Str::random(10) . '.' . $userData['voice']->getClientOriginalExtension()
+                ) : Http::asForm();
+            $response = $http
                 ->withHeaders([
                     'Accept' => 'application/json',
                     'API-Key' => $this->apiKey,
@@ -57,11 +88,13 @@ class AiService
             if (!$response->successful()) {
                 throw new CustomException($response->body());
             }
-            $data = $response->json('assistant_message');
+            $assistant = $response->json('assistant_message');
+            $user = $response->json('user_message');
 
-            if (isset($data['content'])) {
+            if (isset($assistant['content'])) {
                 return [
-                    'message' => $data['content']
+                    'message' => $assistant['content'],
+                    'user_message' => $user['content']
                 ];
             }
 
@@ -79,6 +112,10 @@ class AiService
      */
     public function starterMessage(string $botType): array
     {
+        if (!$this->apiKey) {
+            throw new CustomException('set api key before usage');
+        }
+
         $supportedBotTypes = array_values(config('services.ai.static_bot_types'));
 
         if (!in_array($botType, $supportedBotTypes)) {

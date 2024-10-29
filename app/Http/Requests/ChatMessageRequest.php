@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class ChatMessageRequest extends FormRequest
 {
@@ -24,7 +23,8 @@ class ChatMessageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'text' => 'required'
+            'text' => ['nullable', 'string'],
+            'voice' => ['nullable', 'file', 'mimes:wav,mp3', 'max:10240'],
         ];
     }
 }

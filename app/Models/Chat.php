@@ -10,6 +10,9 @@ use Illuminate\Support\Str;
 
 /**
  * @property Collection<Message> $messages
+ * @property Corporate | Model $corporate
+ * @property int $id
+ * @property string $slug
  */
 class Chat extends Model
 {
