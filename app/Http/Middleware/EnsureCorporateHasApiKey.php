@@ -14,8 +14,11 @@ class EnsureCorporateHasApiKey
      *
      * @param Closure(Request): (Response) $next
      */
-    public function handle(Request $request, Closure $next, Corporate $corporate): Response
+    public function handle(Request $request, Closure $next): Response
     {
+        /** @var Corporate $corporate */
+        $corporate = $request->route('corporate');
+
         if (is_null($corporate->api_key)) {
             return response()->json([
                 'message' => 'Unauthorized access'

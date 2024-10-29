@@ -15,7 +15,6 @@ return [
     */
 
     'ai' => [
-        'api_key' => env('AI_API_KEY'),
         'base_url' => env('AI_BASE_URL'),
         'chat' => [
             'echo' => '/chat/echo',

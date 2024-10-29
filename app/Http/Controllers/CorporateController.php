@@ -36,10 +36,14 @@ class CorporateController extends Controller
      */
     public function chat(Corporate $corporate, string $botType): JsonResponse
     {
+        // First try to get the starter message for the specific bot type
+        $result = $this->service
+            ->setApiKey($corporate->api_key)
+            ->starterMessage($botType);
+
+        // If successful create the chat with the starter message
         /** @var Chat $chat */
         $chat = $corporate->chats()->create();
-        $result = $this->service->starterMessage($botType);
-
         $starterMessage = $chat->messages()->create([
             'role' => 'bot',
             'text' => $result['message']

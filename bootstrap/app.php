@@ -2,6 +2,7 @@
 
 use App\Exceptions\CustomException;
 use App\Http\Middleware\EnsureCorporateHasApiKey;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,7 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'auth:corp' => EnsureCorporateHasApiKey::class
+            'corp' => EnsureCorporateHasApiKey::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
@@ -23,5 +24,11 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json([
                 'message' => $e->getMessage(),
             ], 400);
+        });
+
+        $exceptions->render(function (ModelNotFoundException $e, $request) {
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 404);
         });
     })->create();

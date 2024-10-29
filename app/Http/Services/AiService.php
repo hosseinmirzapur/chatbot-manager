@@ -14,7 +14,13 @@ class AiService
     public function __construct()
     {
         $this->baseUrl = strval(config('services.ai.base_url'));
-        $this->apiKey = strval(config('services.ai.api_key'));
+    }
+
+    public function setApiKey(string $apiKey): AiService
+    {
+        $this->apiKey = $apiKey;
+
+        return $this;
     }
 
     /**
@@ -73,7 +79,8 @@ class AiService
      */
     public function starterMessage(string $botType): array
     {
-        $supportedBotTypes = array(config('services.ai.static_bot_types'));
+        $supportedBotTypes = array_values(config('services.ai.static_bot_types'));
+
         if (!in_array($botType, $supportedBotTypes)) {
             throw new CustomException('bot type not supported');
         }
@@ -94,7 +101,7 @@ class AiService
                 throw new CustomException($response->body());
             }
 
-            $bot_res = $response->body();
+            $bot_res = $response->json();
 
             return [
                 'message' => $bot_res
