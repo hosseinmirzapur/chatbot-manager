@@ -24,7 +24,7 @@ class ChatMessageRequest extends FormRequest
     {
         return [
             'text' => ['nullable', 'string'],
-            'voice' => ['nullable', 'file', 'mimetypes:audio/wav,audio/mp3', 'max:10240'],
+            'voice' => ['nullable', 'file', 'mimes:wav,mp3,webm', 'max:10240'],
         ];
     }
 }

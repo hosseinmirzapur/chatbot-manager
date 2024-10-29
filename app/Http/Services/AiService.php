@@ -4,6 +4,8 @@ namespace App\Http\Services;
 
 use App\Exceptions\CustomException;
 use Exception;
+use FFMpeg\FFMpeg;
+use FFMpeg\Format\Audio\Mp3;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -39,6 +41,10 @@ class AiService
             if (!file_exists($userData['voice']) || !is_readable($userData['voice'])) {
                 throw new CustomException('Audio file is not accessible');
             }
+
+            // Convert input voice to mp3
+            $this->convertToMP3($userData);
+
             $postUrl = $this->baseUrl . config('services.ai.chat.converse.audio');
             $postData = [
                 'request' => json_encode([
@@ -75,8 +81,8 @@ class AiService
             $http = isset($userData['voice']) ? Http::asMultipart()
                 ->attach(
                     'audio_file',
-                    fopen($userData['voice'], 'r'),
-                    Str::random(10) . '.' . $userData['voice']->getClientOriginalExtension()
+                    $userData['voice'],
+                    Str::random(10) . '.mp3'
                 ) : Http::asForm();
             $response = $http
                 ->withHeaders([
@@ -146,6 +152,32 @@ class AiService
         } catch (Exception $e) {
             throw new CustomException($e->getMessage());
         }
+    }
+
+    /**
+     * @param array $data
+     * @return void
+     */
+    private function convertToMP3(array &$data): void
+    {
+        $convertor = FFMpeg::create();
+
+        $audio = $convertor->open($data['voice']);
+        $format = new Mp3();
+
+        // Use a buffer to store the converted audio content
+        $tempFile = tempnam(sys_get_temp_dir(), 'audio_') . '.mp3';
+
+        // Convert and write to the output buffer
+        $audio->save($format, $tempFile);
+
+        $audioContent = file_get_contents($tempFile);
+
+        // Close the buffer
+        unlink($tempFile);
+
+        // set `voice` parameter as intended
+        $data['voice'] = $audioContent;
     }
 
 }
