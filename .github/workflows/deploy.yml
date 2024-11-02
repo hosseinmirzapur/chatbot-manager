@@ -25,7 +25,9 @@ jobs:
             if [ ! -d ".git" ]; then
               sudo -u deployer git clone https://github.com/hosseinmirzapur/chatbot-manager.git .
             else
+              sudo -u deployer git stash
               sudo -u deployer git pull origin main
+              sudo -u deployer git stash pop
             fi
 
             echo "Copy .env file to the project directory..."
