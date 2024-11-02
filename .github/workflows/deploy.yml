@@ -6,35 +6,8 @@ on:
       - main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          push: true
-          tags: |
-            ${{ secrets.DOCKER_USERNAME }}/chatbots-api:latest
-            ${{ secrets.DOCKER_USERNAME }}/chatbots-api:${{ github.sha }}
-          file: deployment/Dockerfile
-          no-cache: true
-
   deploy:
     runs-on: ubuntu-latest
-    needs: build
     steps:
       - name: SSH to server and deploy
         env:
@@ -45,31 +18,29 @@ jobs:
           echo "$SSH_PRIVATE_KEY" | tr -d '\r' > private_key
           chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key $USERNAME@$SERVER_IP << 'EOF'
-            docker stop chatbots-api || true
-            docker rm chatbots-api || true
-            docker pull ${{ secrets.DOCKER_USERNAME }}/chatbots-api:${{ github.sha }}
-            echo "Running container with --network laravel_network argument..."
-            docker run --rm --network laravel_network --dns 8.8.8.8 --dns 8.8.4.4 -d --name chatbots-api -p 8000:80 --env-file /var/www/chatbots/backend/.env ${{ secrets.DOCKER_USERNAME }}/chatbots-api:${{ github.sha }}
-            sleep 3
-            echo "Pruning dangling images..."
-            docker image prune -f
-            sleep 3
-            echo "Migrating database..."
-            docker exec chatbots-api php artisan migrate --force
-            sleep 3
-            echo "Clear config..."
-            docker exec chatbots-api php artisan config:clear
-            sleep 3
-            echo "Caching config..."
-            docker exec chatbots-api php artisan config:cache
-            sleep 3
-            echo "Clearing cache..."
-            docker exec chatbots-api php artisan cache:clear
-            sleep 3
-            echo "Optimizing Filament config..."
-            docker exec chatbots-api php artisan filament:optimize-clear
-            sleep 3
-            docker exec chatbots-api php artisan filament:optimize
+            cd /var/www/chatbots/backend
+
+            # Check if the repository is already cloned
+            if [ ! -d ".git" ]; then
+              sudo -u deployer git clone https://github.com/hosseinmirzapur/chatbot-manager.git .
+            else
+              sudo -u deployer git pull origin main
+            fi
+            sudo -u deployer cp /var/www/chatbots/.env /var/www/chatbots/backend/.env
+
+            # Install dependencies
+            sudo -u deployer composer install --no-interaction --prefer-dist
+
+            # Run migrations and optimize the application
+            sudo -u deployer php artisan migrate --force
+            sudo -u deployer php artisan config:cache
+            sudo -u deployer php artisan route:cache
+
+            # Restart PHP-FPM to apply changes (optional)
+            sudo systemctl restart php8.2-fpm
+
+            # Clear and cache views (optional)
+            sudo -u deployer php artisan view:clear
           EOF
 
           # Clean up the temporary key file
