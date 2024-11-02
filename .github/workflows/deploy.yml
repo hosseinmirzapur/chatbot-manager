@@ -18,31 +18,34 @@ jobs:
           echo "$SSH_PRIVATE_KEY" | tr -d '\r' > private_key
           chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key $USERNAME@$SERVER_IP << 'EOF'
+            echo "cd into project directory..."
             cd /var/www/chatbots/backend
 
-            # Check if the repository is already cloned
+            echo "Check if the repository is already cloned..."
             if [ ! -d ".git" ]; then
               sudo -u deployer git clone https://github.com/hosseinmirzapur/chatbot-manager.git .
             else
               sudo -u deployer git pull origin main
             fi
+
+            echo "Copy .env file to the project directory..."
             sudo -u deployer cp /var/www/chatbots/.env /var/www/chatbots/backend/.env
 
-            # Install dependencies
+            echo "Install dependencies..."
             sudo -u deployer composer install --no-interaction --prefer-dist
 
-            # Handling permissions
+            echo "Handling permissions..."
             sudo -u deployer chmod -R 0777 storage/ bootstrap/cache
 
-            # Run migrations and optimize the application
+            echo "Run migrations and optimize the application..."
             sudo -u deployer php artisan migrate --force
             sudo -u deployer php artisan config:cache
             sudo -u deployer php artisan route:cache
 
-            # Restart PHP-FPM to apply changes (optional)
+            echo "Restart PHP-FPM to apply changes..."
             sudo systemctl restart php8.2-fpm
 
-            # Clear and cache views (optional)
+            echo "Clear and cache views..."
             sudo -u deployer php artisan view:clear
           EOF
 
