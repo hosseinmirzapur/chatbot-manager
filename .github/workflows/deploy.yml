@@ -31,6 +31,9 @@ jobs:
             # Install dependencies
             sudo -u deployer composer install --no-interaction --prefer-dist
 
+            # Handling permissions
+            sudo -u deployer chmod -R 0777 storage/ bootstrap/cache
+
             # Run migrations and optimize the application
             sudo -u deployer php artisan migrate --force
             sudo -u deployer php artisan config:cache
