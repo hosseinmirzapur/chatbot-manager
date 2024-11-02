@@ -39,16 +39,16 @@ class ChatController extends Controller
         $data = $request->validated();
 
         if (!isset($data['text']) && !isset($data['voice'])) {
-            throw new CustomException('at least one of text or voice field is required', 422);
+            throw new CustomException('حداقل یکی از فیلد های متن یا صوت اجباری هستند', 422);
         }
 
         if (isset($data['text']) && isset($data['voice'])) {
-            throw new CustomException('cannot send both text and voice message', 422);
+            throw new CustomException('خطا! نمیتوان هم متن و هم صدا ارسال کرد.', 422);
         }
 
         $corporate = $chat->corporate;
         if ($corporate->status !== 'ACCEPTED' || !$corporate->api_key) {
-            throw new CustomException('unauthorized access', 403);
+            throw new CustomException('دسترسی غیر مجاز', 403);
         }
 
         $result = $this->service

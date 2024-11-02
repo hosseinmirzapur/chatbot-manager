@@ -21,13 +21,13 @@ class EnsureCorporateHasApiKey
 
         if (is_null($corporate->api_key)) {
             return response()->json([
-                'message' => 'Unauthorized access'
+                'message' => 'دسترسی غیر مجاز'
             ], 403);
         }
 
         if ($corporate->status !== 'ACCEPTED') {
             return response()->json([
-                'message' => 'Unauthorized access'
+                'message' => 'دسترسی غیر مجاز'
             ], 403);
         }
         return $next($request);

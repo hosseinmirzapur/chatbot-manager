@@ -34,12 +34,12 @@ class AiService
     public function sendToBot(array $userData): array
     {
         if (!$this->apiKey) {
-            throw new CustomException('set api key before usage');
+            throw new CustomException('ابتدا api key را ست کنید.');
         }
         if (isset($userData['voice'])) {
             // Ensure that the file exists and is readable
             if (!file_exists($userData['voice']) || !is_readable($userData['voice'])) {
-                throw new CustomException('Audio file is not accessible');
+                throw new CustomException('فایل صوتی غیر قابل دسترس است');
             }
 
             // Convert input voice to mp3
@@ -104,10 +104,10 @@ class AiService
                 ];
             }
 
-            throw new CustomException('bot has no response');
+            throw new CustomException('چت بات پاسخی ندارد');
 
         } catch (Exception $e) {
-            throw new CustomException($e->getMessage());
+            throw new CustomException('خطایی در پاسخ دهی چت بات رخ داده است');
         }
     }
 
@@ -125,7 +125,7 @@ class AiService
         $supportedBotTypes = array_values(config('services.ai.static_bot_types'));
 
         if (!in_array($botType, $supportedBotTypes)) {
-            throw new CustomException('bot type not supported');
+            throw new CustomException('این نوع چت بات پشتیبانی نمیشود');
         }
 
         $starterMessageEndpoint = strval(config('services.ai.chat.converse.starter-message'));
@@ -150,7 +150,7 @@ class AiService
                 'message' => $bot_res
             ];
         } catch (Exception $e) {
-            throw new CustomException($e->getMessage());
+            throw new CustomException('خطایی در پاسخ دهی چت بات رخ داده است');
         }
     }
 

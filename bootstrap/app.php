@@ -28,7 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->render(function (ModelNotFoundException $e, $request) {
             return response()->json([
-                'message' => $e->getMessage(),
+                'message' => 'منبع مورد نظر شما یافت نشد',
             ], 404);
         });
     })->create();
